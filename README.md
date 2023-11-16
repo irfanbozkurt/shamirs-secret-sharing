@@ -15,19 +15,17 @@ We allow users to generate Leo code that splits a given secret into <b>k</b> pie
 ### Codegen
 
 ```sh
-bun gen -- <n> <k>
-bun gen -- 10 3
+# bun gen <n> <k>
+bun gen 10 3
 ```
 
-This will output a <b>outputs/main.leo</b> that contains all required Leo code to split a given secret and to recover it back, following given parameters.
-
-This will also prepare a <b>inputs/shamir.in</b> file in which user will put the inputs to the <b>recover</b> function (more on this later).
+This will output a `outputs/main.leo` that contains all required Leo code to split a given secret and to recover it back, following given parameters. This will also prepare a `inputs/shamir.in` file in which user will put the inputs to the `recover` function (more on this later).
 
 ### Splitting the secret
 
 After the codegen phase, run the following command from the root directory to split the secret.
 
-> ![WARNING]
+> **Warning**
 >
 > Your secret needs to be a [field element](https://developer.aleo.org/advanced/the_aleo_curves/edwards_bls12/)).
 
@@ -141,5 +139,6 @@ And you have the secret back.
 We have written a small test that runs several cases of $(k, n)$ where a random secret is splitted and then recovered again. To run them:
 
 ```sh
-bun test
+bun run test
+# not `bun test`!
 ```

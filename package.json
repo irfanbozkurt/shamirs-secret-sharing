@@ -4,6 +4,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
+    "test": "bun test --timeout 30000 --bail --coverage",
     "gen": "bun run ./bin/index.ts",
     "split": "leo run split",
     "recover": "leo run recover",
