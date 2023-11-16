@@ -8,7 +8,7 @@ We allow users to generate Leo code that splits a given secret into <b>k</b> pie
 ## Considerations
 
 1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code for some given $(k, n)$ parameters.
-2. We support secret splitting up to 32 pieces (k <= 32), but you can get as many evaluations (of your secret polynomial) as you want. For example, you can get 550 evaluations of your secret polynomial, out of which $k$ of them will suffice for recovery.
+2. We support secret splitting up to 32 pieces (k <= 32), but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
 
 ## How to Use
 

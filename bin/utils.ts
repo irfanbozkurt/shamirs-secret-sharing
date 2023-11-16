@@ -46,13 +46,19 @@ export function parseOutput(n: number, output: string): [bigint, bigint][] {
     .replaceAll("field", "")
     .replaceAll(",", "");
 
-  const lines = output.split("\n").map((line) => line.trim());
-  if (lines.length != n * 4 + 2) {
-    console.log(output);
-    throw new Error(`Unexpected line count (have: ${lines.length}, want: ${n * 4 + 2})`);
-  }
+  const lines = output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter((l) => l !== "[" && l !== "]");
 
-  return Array.from({ length: n }, (_, i) => [BigInt(lines[i * 4 + 2]), BigInt(lines[i * 4 + 3])] as [bigint, bigint]);
+  // if (lines.length != n * 4 + 2) {
+  //   console.log(lines);
+  //   throw new Error(`Unexpected line count (have: ${lines.length}, want: ${n * 4 + 2})`);
+  // }
+
+  console.log(lines);
+
+  return Array.from({ length: n }, (_, i) => [BigInt(lines[i * 2]), BigInt(lines[i * 2 + 1])] as [bigint, bigint]);
 }
 
 export function createInput(evals: [bigint, bigint][]): string {

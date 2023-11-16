@@ -1,12 +1,7 @@
 import { generateCircuit } from "./generate";
+import constants from "./constants";
 
 if (import.meta.main) {
-  /** Leo looks for main.leo to run the code. */
-  const CODE_TARGET = "./src/main.leo";
-
-  /** Leo looks for inputs/shamir.in to parse inputs, especially for `recover`. */
-  const IN_TARGET = "./inputs/shamir.in";
-
   let N = 10; // number of evaluation points
   let K = 3; // degree of polynomial
 
@@ -30,11 +25,11 @@ if (import.meta.main) {
   const code = generateCircuit(K, N);
 
   // output to main
-  await Bun.write(CODE_TARGET, code);
+  await Bun.write(constants.CODE_TARGET, code);
 
-  // also prepare input file
+  // also prepare input file for pasting evaluations from the output
   await Bun.write(
-    IN_TARGET,
+    constants.IN_TARGET,
     `[recover]
 evals: [[field; 2]; ${K}] = [
 
@@ -42,5 +37,5 @@ evals: [[field; 2]; ${K}] = [
 `,
   );
 
-  console.log("Created code at:", CODE_TARGET);
+  console.log("Created code at:", constants.CODE_TARGET);
 }
