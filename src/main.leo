@@ -1,9 +1,10 @@
 program shamir.aleo {
 
     // horner's method to evaluate a polynomial of degree k-1
-    inline horner(coeff: [field; 2], at: field) -> field {
+    inline horner(coeff: [field; 3], at: field) -> field {
         let eval: field = 0field;
 
+        eval = eval * at + coeff[2u8];
         eval = eval * at + coeff[1u8];
         eval = eval * at + coeff[0u8];
 
@@ -11,11 +12,11 @@ program shamir.aleo {
     }
 
     // recover the secret from k evaluations
-    transition recover(evals: [[field; 2]; 2]) -> field {
+    transition recover(evals: [[field; 2]; 3]) -> field {
       let secret: field = 0field;
-      for i: u8 in 0u8..2u8 {
+      for i: u8 in 0u8..3u8 {
         let evaly: field = evals[i][1u8];
-        for j: u8 in 0u8..2u8 {
+        for j: u8 in 0u8..3u8 {
           evaly *= evals[j][0u8] * (i != j ? (evals[j][0u8] - evals[i][0u8]) : evals[j][0u8]).inv();
         }
         secret += evaly;
@@ -28,9 +29,10 @@ program shamir.aleo {
       // compute coefficients via consecutive hashing
       let coeff_0: field = secret;
       let coeff_1: field = Poseidon2::hash_to_field(coeff_0);
+      let coeff_2: field = Poseidon2::hash_to_field(coeff_1);
 
       // represent coeffs as an array
-      let coeffs: [field; 2] = [coeff_0, coeff_1];
+      let coeffs: [field; 3] = [coeff_0, coeff_1, coeff_2];
 
       return [
              [

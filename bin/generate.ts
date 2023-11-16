@@ -34,15 +34,12 @@ async function makeAleo(n: number, k: number) {
     `program shamir.aleo {
 
     // horner's method to evaluate a polynomial of degree k-1
-    inline horner(coeff: [[field; 32]; ${recoverArrCount}], coeff_count: u8, at: field) -> field {
+    inline horner(coeff: [field; ${k}], at: field) -> field {
         let eval: field = 0field;
 
 ${Array.from(
   { length: k },
-  (_, i) =>
-    `        eval = eval * at + coeff[${Math.floor(i / 32)}u${bk}][${
-      k - i - 1
-    }u${bk}];`
+  (_, i) => `        eval = eval * at + coeff[${k - i - 1}u${bk}];`
 ).join("\n")}
 
         return eval;
@@ -72,19 +69,10 @@ ${Array.from(
 ).join("\n")}
 
       // represent coeffs as an array
-      let coeffs: [[field; 32]; ${recoverArrCount}] = [
-        ${Array.from({ length: 34 * recoverArrCount }, (_, i) => {
-          if (i % 34 == 0) return `     [\n`;
-          if (i % 34 == 33)
-            return `      ]${i == 34 * recoverArrCount - 1 ? "" : ","}\n`;
-
-          const idx = (i % 34) + Math.floor(i / 34) * 32;
-
-          return idx > k
-            ? `      0field${i % 34 == 32 ? "" : ","}\n`
-            : `      coeff_${idx - 1}${i % 34 == 32 ? "" : ","}\n`;
-        }).join("")}
-      ];
+      let coeffs: [field; ${k}] = [${Array.from(
+      { length: k },
+      (_, i) => `coeff_${i}`
+    ).join(", ")}];
 
       return [
         ${Array.from({ length: 34 * splitArrCount }, (_, i) => {
@@ -93,7 +81,7 @@ ${Array.from(
             return `      ]${i == 34 * splitArrCount - 1 ? "" : ","}\n`;
 
           const fieldIdx = (i % 34) + Math.floor(i / 34) * 32;
-          return `      [${fieldIdx}field, horner(coeffs, ${k}u8, ${fieldIdx}field)]${
+          return `      [${fieldIdx}field, horner(coeffs, ${fieldIdx}field)]${
             i % 34 == 32 ? "" : ","
           }\n`;
         }).join("")}

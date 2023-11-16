@@ -5,7 +5,9 @@
   "scripts": {
     "gen": "bun run ./bin/generate.ts",
     "split": "leo run split",
-    "recover": "leo run recover"
+    "recover": "leo run recover",
+    "split:execute": "leo execute split",
+    "recover:execute": "leo execute recover"
   },
   "devDependencies": {
     "bun-types": "latest"
