@@ -1,6 +1,6 @@
 # Shamir's Secret Sharing
 
-We allow users to generate Leo code that splits a given secret into <b>k</b> pieces, which recover the original secret when all put back together.
+We allow users to generate Leo code that splits a given secret into $n$ shares, from which $k$ of them is sufficient recover the original secret when all put back together.
 
 - $k$ is the number of evaluations required to reconstruct the secret. Maximum value it can take is 32 (bounded by Leo's array size).
 - $n$ is the number of evaluations you want. Again, $k$ of them will suffice for recovery.
@@ -8,11 +8,13 @@ We allow users to generate Leo code that splits a given secret into <b>k</b> pie
 ## Considerations
 
 1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code for some given $(k, n)$ parameters.
-2. We support secret splitting up to 32 pieces (k <= 32), but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
+2. We support secret splitting up to 32 pieces $k \leq 32$, but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
 
 ## How to Use
 
-### Codegen
+First you must generate the contract for $(k, n)$ parameters of your choice. Then, you can either use `leo run` or our wrappers within `package.json` to split a share, or recover a secret from evaluations. We describe each step within this section.
+
+### Generating the Aleo contract
 
 ```sh
 # bun gen <n> <k>
@@ -25,19 +27,21 @@ This will output a `outputs/main.leo` that contains all required Leo code to spl
 
 After the codegen phase, run the following command from the root directory to split the secret.
 
-> **Warning**
->
-> Your secret needs to be a [field element](https://developer.aleo.org/advanced/the_aleo_curves/edwards_bls12/)).
+> [!WARNING]  
+> Your secret needs to be a [field element](https://developer.aleo.org/advanced/the_aleo_curves/edwards_bls12/).
 
 ```sh
 # bun split <secret>
 bun split 96024field
+
+# or with leo
+leo run split 96024field
 ```
 
 <br>
 
 <details>
-    <summary>See example output for n=10</summary>
+    <summary>See example output for <code>n=10</code></summary>
 
 ```c
 [
@@ -92,20 +96,18 @@ bun split 96024field
 
 ### Recovering the secret
 
-Grab $k$ of the field elements outputted in step-2, and place them into `/inputs/shamir.in` file.
+Grab $k$ of the field elements outputted in step-2, and place them into `/inputs/shamir.in` file. For $k=3$, the file should already look as follows:
 
-For $k=3$, the file should already look as follows:
-
-```
+```js
 [recover]
 evals: [[field; 2]; 3] = [
 
 ];
 ```
 
-User basically needs to place any 3 elements outputted by step-2 here. A valid input would look as follows:
+You basically need to place any 3 elements outputted by step-2 here. A valid input would look as follows:
 
-```
+```js
 [recover]
 evals: [[field; 2]; 3] = [
   [
@@ -140,5 +142,6 @@ We have written a small test that runs several cases of $(k, n)$ where a random 
 
 ```sh
 bun run test
-# not `bun test`!
 ```
+
+Note that this is not `bun test`, but instead calls the `test` script within `package.json` which has some parameters passed into Bun.
