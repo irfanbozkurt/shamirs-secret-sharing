@@ -1,10 +1,16 @@
-# Shamir Aleo
+# Shamir's Secret Sharing
 
-Shamir Secret Sharing implemented in Leo language.
+Shamiroquai allows users to generate Leo code that splits a given secret into <b>k</b> pieces, which recover the original secret when all put back together.
+
+- <b>k</b> is the number of evaluations required to reconstruct the secret.
+- <b>n</b> is the number of evaluations you want. Again, <b>k</b> of them will suffice for recovery.
+
+# Considerations
+
+1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code.
+2. We generate code
 
 ## Codegen
-
-To generate Leo code that generates <b>n</b> field elements off of your secret, and recovers the original secret from <b>k</b> of those field elements.
 
 ```sh
 bun gen -- <n> <k>
