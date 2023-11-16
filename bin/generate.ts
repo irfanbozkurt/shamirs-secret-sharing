@@ -31,26 +31,39 @@ async function makeAleo(n: number, k: number) {
 
   const recoverArrCount = Math.ceil(k / 32); // count of arrays of size 32
 
+  /*
+
+        ${Array.from(
+      { length: k },
+      (_, i) => `coeff_${i}`
+    ).join(", ")}
+  ];
+
+  */
+
   await Bun.write(
     `./src/main.leo`,
     `program shamir.aleo {
 
     // horner's method to evaluate a polynomial of degree k-1
-    inline horner(coeff: [field; ${k}], at: field) -> field {
+    inline horner(coeff: [[field; 32]; ${recoverArrCount}], coeff_count: u8, at: field) -> field {
         let eval: field = 0field;
 
 ${Array.from(
   { length: k },
-  (_, i) => `        eval = eval * at + coeff[${k - i - 1}u${bk}];`
+  (_, i) =>
+    `        eval = eval * at + coeff[${Math.floor(i / 32)}u${bk}][${
+      k - i - 1
+    }u${bk}];`
 ).join("\n")}
 
         return eval;
     }
 
     // recover the secret from k evaluations
-    transition recover(evals: [[[field; 2]; ${k}]; ${recoverArrCount}]) -> field {
+    transition recover(evals: [[[field; 2]; 32]; ${recoverArrCount}]) -> field {
       let secret: field = 0field;
-      for l: u8 in 0u8..${recoverArrCount}u8 {
+      for l: u8 in 0u${bk}..${recoverArrCount}u${bk} {
         for i: u${bk} in 0u${bk}..${k}u${bk} {
           let evaly: field = evals[l][i][1u8];
           for j: u${bk} in 0u${bk}..${k}u${bk} {
@@ -73,10 +86,19 @@ ${Array.from(
 ).join("\n")}
 
       // represent coeffs as an array
-      let coeffs: [field; ${k}] = [${Array.from(
-      { length: k },
-      (_, i) => `coeff_${i}`
-    ).join(", ")}];
+      let coeffs: [[field; 32]; ${recoverArrCount}] = [
+        ${Array.from({ length: 34 * recoverArrCount }, (_, i) => {
+          if (i % 34 == 0) return `     [\n`;
+          if (i % 34 == 33)
+            return `      ]${i == 34 * recoverArrCount - 1 ? "" : ","}\n`;
+
+          const idx = (i % 34) + Math.floor(i / 34) * 32;
+
+          return idx > k
+            ? `      0field${i % 34 == 32 ? "" : ","}\n`
+            : `      coeff_${idx - 1}${i % 34 == 32 ? "" : ","}\n`;
+        }).join("")}
+      ];
 
       return [
         ${Array.from({ length: 34 * splitArrCount }, (_, i) => {
@@ -85,7 +107,7 @@ ${Array.from(
             return `      ]${i == 34 * splitArrCount - 1 ? "" : ","}\n`;
 
           const fieldIdx = (i % 34) + Math.floor(i / 34) * 32;
-          return `      [${fieldIdx}field, horner(coeffs, ${fieldIdx}field)]${
+          return `      [${fieldIdx}field, horner(coeffs, ${k}u8, ${fieldIdx}field)]${
             i % 34 == 32 ? "" : ","
           }\n`;
         }).join("")}
