@@ -1,0 +1,6 @@
+{
+  "program": "shamir.aleo",
+  "version": "0.0.1",
+  "description": "Shamir's secret sharing",
+  "license": "UNLICENSED"
+}

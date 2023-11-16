@@ -1,0 +1,15 @@
+{
+  "name": "hocam",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "gen": "bun run ./bin/generate.ts",
+    "split": "leo run split"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
