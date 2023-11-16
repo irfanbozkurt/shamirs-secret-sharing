@@ -29,18 +29,6 @@ async function makeAleo(n: number, k: number) {
   // To make splitting to more pieces possible, we need nested arrays.
   const splitArrCount = Math.ceil(n / 32); // count of arrays of size 32
 
-  const recoverArrCount = Math.ceil(k / 32); // count of arrays of size 32
-
-  /*
-
-        ${Array.from(
-      { length: k },
-      (_, i) => `coeff_${i}`
-    ).join(", ")}
-  ];
-
-  */
-
   await Bun.write(
     `./src/main.leo`,
     `program shamir.aleo {
@@ -61,16 +49,14 @@ ${Array.from(
     }
 
     // recover the secret from k evaluations
-    transition recover(evals: [[[field; 2]; 32]; ${recoverArrCount}]) -> field {
+    transition recover(evals: [[field; 2]; ${k}]) -> field {
       let secret: field = 0field;
-      for l: u8 in 0u${bk}..${recoverArrCount}u${bk} {
-        for i: u${bk} in 0u${bk}..${k}u${bk} {
-          let evaly: field = evals[l][i][1u8];
-          for j: u${bk} in 0u${bk}..${k}u${bk} {
-            evaly *= evals[l][j][0u8] * (i != j ? (evals[l][j][0u8] - evals[l][i][0u8]) : evals[l][j][0u8]).inv();
-          }
-          secret += evaly;
+      for i: u${bk} in 0u${bk}..${k}u${bk} {
+        let evaly: field = evals[i][1u8];
+        for j: u${bk} in 0u${bk}..${k}u${bk} {
+          evaly *= evals[j][0u8] * (i != j ? (evals[j][0u8] - evals[i][0u8]) : evals[j][0u8]).inv();
         }
+        secret += evaly;
       }
       return secret;
     }
@@ -123,7 +109,7 @@ ${Array.from(
     `./inputs/shamir.in`,
     `
 [recover]
-evals: [[[field; 2]; ${k}]; ${recoverArrCount}] = [
+evals: [[field; 2]; ${k}] = [
 
 ];
 `
