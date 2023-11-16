@@ -41,22 +41,20 @@ program shamir.aleo {
     }
 
     // recover the secret from k evaluations
-    transition recover(evals: [[[field; 2]; 32]; 1]) -> field {
+    transition recover(evals: [[field; 2]; 32]) -> field {
       let secret: field = 0field;
-      for l: u8 in 0u8..1u8 {
-        for i: u8 in 0u8..32u8 {
-          let evaly: field = evals[l][i][1u8];
-          for j: u8 in 0u8..32u8 {
-            evaly *= evals[l][j][0u8] * (i != j ? (evals[l][j][0u8] - evals[l][i][0u8]) : evals[l][j][0u8]).inv();
-          }
-          secret += evaly;
+      for i: u8 in 0u8..32u8 {
+        let evaly: field = evals[i][1u8];
+        for j: u8 in 0u8..32u8 {
+          evaly *= evals[j][0u8] * (i != j ? (evals[j][0u8] - evals[i][0u8]) : evals[j][0u8]).inv();
         }
+        secret += evaly;
       }
       return secret;
     }
   
     // split a secret to n points, using k coefficients for a (k-1) degree polynomial
-    transition split(secret: field) -> [[[field; 2]; 32]; 2] {
+    transition split(secret: field) -> [[[field; 2]; 32]; 3] {
       // compute coefficients via consecutive hashing
       let coeff_0: field = secret;
       let coeff_1: field = Poseidon2::hash_to_field(coeff_0);
@@ -162,6 +160,40 @@ program shamir.aleo {
       [62field, horner(coeffs, 62field)],
       [63field, horner(coeffs, 63field)],
       [64field, horner(coeffs, 64field)]
+      ],
+     [
+      [65field, horner(coeffs, 65field)],
+      [66field, horner(coeffs, 66field)],
+      [67field, horner(coeffs, 67field)],
+      [68field, horner(coeffs, 68field)],
+      [69field, horner(coeffs, 69field)],
+      [70field, horner(coeffs, 70field)],
+      [71field, horner(coeffs, 71field)],
+      [72field, horner(coeffs, 72field)],
+      [73field, horner(coeffs, 73field)],
+      [74field, horner(coeffs, 74field)],
+      [75field, horner(coeffs, 75field)],
+      [76field, horner(coeffs, 76field)],
+      [77field, horner(coeffs, 77field)],
+      [78field, horner(coeffs, 78field)],
+      [79field, horner(coeffs, 79field)],
+      [80field, horner(coeffs, 80field)],
+      [81field, horner(coeffs, 81field)],
+      [82field, horner(coeffs, 82field)],
+      [83field, horner(coeffs, 83field)],
+      [84field, horner(coeffs, 84field)],
+      [85field, horner(coeffs, 85field)],
+      [86field, horner(coeffs, 86field)],
+      [87field, horner(coeffs, 87field)],
+      [88field, horner(coeffs, 88field)],
+      [89field, horner(coeffs, 89field)],
+      [90field, horner(coeffs, 90field)],
+      [91field, horner(coeffs, 91field)],
+      [92field, horner(coeffs, 92field)],
+      [93field, horner(coeffs, 93field)],
+      [94field, horner(coeffs, 94field)],
+      [95field, horner(coeffs, 95field)],
+      [96field, horner(coeffs, 96field)]
       ]
 
       ];
