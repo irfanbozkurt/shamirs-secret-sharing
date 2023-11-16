@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "gen": "bun run ./bin/generate.ts",
-    "split": "leo run split"
+    "split": "leo run split",
+    "recover": "leo run recover"
   },
   "devDependencies": {
     "bun-types": "latest"

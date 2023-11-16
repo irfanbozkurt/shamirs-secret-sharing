@@ -21,17 +21,21 @@ function getBitSize(x: number): 8 | 16 | 32 | 64 | 128 {
  * @param b bitsize for n (TODO: decide this based on `n`)
  * @returns the Aleo program to do Shamir Secret Sharing
  */
-function makeAleo(n: number, k: number) {
-  if (k < 2) {
-    throw new Error("k must be greater than 2");
-  }
-
+async function makeAleo(n: number, k: number) {
   // number of bits needed for index `k` to iterate over the polynomial
   const bk = getBitSize(k);
 
-  return `program shamir.aleo {
+  // Aleo supports arrays of size up to 32.
+  // To make splitting to more pieces possible, we need nested arrays.
+  const splitArrCount = Math.ceil(n / 32); // count of arrays of size 32
 
-    // horner's method to evaluate a polynomial of k-1 degree
+  const recoverArrCount = Math.ceil(k / 32); // count of arrays of size 32
+
+  await Bun.write(
+    `./src/main.leo`,
+    `program shamir.aleo {
+
+    // horner's method to evaluate a polynomial of degree k-1
     inline horner(coeff: [field; ${k}], at: field) -> field {
         let eval: field = 0field;
 
@@ -42,25 +46,24 @@ ${Array.from(
 
         return eval;
     }
-  
+
     // recover the secret from k evaluations
-    transition recover(evals: [[field; 2]; ${k}]) -> field {
+    transition recover(evals: [[[field; 2]; ${k}]; ${recoverArrCount}]) -> field {
       let secret: field = 0field;
-      for i: u${bk} in 0u${bk}..${k}u${bk} {
-        let evaly: field = evals[i][1u8];
-        let evalx: field = evals[i][0u8];
-  
-        for j: u${bk} in 0u${bk}..${k}u${bk} {
-          evaly *= evals[j][0u8] * (i != j ? (evals[j][0u8] - evalx) : evals[j][0u8]).inv();
+      for l: u8 in 0u8..${recoverArrCount}u8 {
+        for i: u${bk} in 0u${bk}..${k}u${bk} {
+          let evaly: field = evals[l][i][1u8];
+          for j: u${bk} in 0u${bk}..${k}u${bk} {
+            evaly *= evals[l][j][0u8] * (i != j ? (evals[l][j][0u8] - evals[l][i][0u8]) : evals[l][j][0u8]).inv();
+          }
+          secret += evaly;
         }
-  
-        secret += evaly;
       }
       return secret;
     }
   
     // split a secret to n points, using k coefficients for a (k-1) degree polynomial
-    transition split(secret: field) -> [[field; 2]; ${n}] {
+    transition split(secret: field) -> [[[field; 2]; 32]; ${splitArrCount}] {
       // compute coefficients via consecutive hashing
       let coeff_0: field = secret;
 ${Array.from(
@@ -71,29 +74,62 @@ ${Array.from(
 
       // represent coeffs as an array
       let coeffs: [field; ${k}] = [${Array.from(
-    { length: k },
-    (_, i) => `coeff_${i}`
-  ).join(", ")}];
+      { length: k },
+      (_, i) => `coeff_${i}`
+    ).join(", ")}];
 
       return [
-${Array.from(
-  { length: n },
-  (_, i) => `          [${i + 1}field, horner(coeffs, ${i + 1}field)]`
-).join(",\n")}
+        ${Array.from({ length: 34 * splitArrCount }, (_, i) => {
+          if (i % 34 == 0) return `     [\n`;
+          if (i % 34 == 33)
+            return `      ]${i == 34 * splitArrCount - 1 ? "" : ","}\n`;
+
+          const fieldIdx = (i % 34) + Math.floor(i / 34) * 32;
+          return `      [${fieldIdx}field, horner(coeffs, ${fieldIdx}field)]${
+            i % 34 == 32 ? "" : ","
+          }\n`;
+        }).join("")}
       ];
+
     }
   
   }
-  `;
+`
+  );
+
+  await Bun.write(
+    `./inputs/shamir.in`,
+    `
+[recover]
+evals: [[[field; 2]; ${k}]; ${recoverArrCount}] = [
+
+];
+`
+  );
 }
 
 if (import.meta.main) {
   console.log("Generating Shamir Secret Share for Aleo.");
-  const N = 10; // number of evaluation points
-  const K = 3; // degree of polynomial
-  const code = makeAleo(N, K);
-  const path = `./src/main.leo`;
+  let N = 10; // number of evaluation points
+  let K = 3; // degree of polynomial
 
-  await Bun.write(path, code);
-  console.log("Output to:", path);
+  if (Bun.argv.length > 2)
+    try {
+      N = parseInt(Bun.argv[2]);
+      if (N < 2)
+        throw new Error(`You must split your secret to at least N=2 pieces`);
+      K = N; // If user provided N but no K, fallback to K = N
+    } catch (e) {
+      console.error(`Please provide a valid integer for N. Error: ${e}`);
+    }
+  if (Bun.argv.length > 3)
+    try {
+      K = parseInt(Bun.argv[3]);
+      if (K > N)
+        throw new Error(`K cannot be > N, but you provided N=${N} and K=${K}`);
+    } catch (e) {
+      console.error(`Please provide a valid integer for K. Error: ${e}`);
+    }
+
+  await makeAleo(N, K);
 }
