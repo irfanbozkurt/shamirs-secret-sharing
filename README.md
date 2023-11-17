@@ -1,14 +1,14 @@
 # Shamir's Secret Sharing
 
-We allow users to generate Leo code that splits a given secret into $n$ shares, from which $k$ of them is sufficient recover the original secret when all put back together.
+We allow users to generate Leo code that splits a given secret into $n$ shares, of which $k$ is sufficient to recover the original secret when all put back together.
 
 - $k$ is the number of evaluations required to reconstruct the secret. Maximum value it can take is 32 (bounded by Leo's array size).
 - $n$ is the number of evaluations you want. Again, $k$ of them will suffice for recovery.
 
 ## Considerations
 
-1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code for some given $(k, n)$ parameters.
-2. We support secret splitting up to 32 pieces $k \leq 32$, but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
+1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code for given $(k, n)$ parameters.
+2. We support secret splitting up to 32 pieces ($k \leq 32$), but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
 
 ## How to Use
 
@@ -25,7 +25,7 @@ curl -fsSL https://bun.sh/install | bash
 bun gen 10 3
 ```
 
-This will output a `outputs/main.leo` that contains all required Leo code to split a given secret and to recover it back, following given parameters. This will also prepare a `inputs/shamir.in` file in which user will put the inputs to the `recover` function (more on this later).
+This will output a `outputs/main.leo` that contains all required Leo code to split a given secret and to recover it back, following given parameters. This will also prepare a `inputs/shamir.in` file in which user will put the inputs for the `recover` function (more on this later).
 
 ### Splitting the secret
 
@@ -109,7 +109,7 @@ evals: [[field; 2]; 3] = [
 ];
 ```
 
-You basically need to place any 3 elements outputted by step-2 here. A valid input would look as follows:
+You basically need to place any $k=3$ elements outputted by step-2 here. A valid input would look as follows:
 
 ```js
 [recover]
@@ -142,7 +142,7 @@ And you have the secret back.
 
 ## Testing
 
-We have written a small test that runs several cases of $(k, n)$ where a random secret is splitted and then recovered again. To run them:
+We have written [small tests](https://github.com/irfanbozkurt/shamirs-secret-sharing/blob/main/test/shamir.test.ts) that runs several cases of $(k, n)$ where a random secret is splitted and then recovered again. To run them:
 
 ```sh
 bun run test
