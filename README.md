@@ -12,7 +12,11 @@ We allow users to generate Leo code that splits a given secret into $n$ shares, 
 
 ## How to Use
 
-First you must generate the contract for $(k, n)$ parameters of your choice. Then, you can either use `leo run` or our wrappers within `package.json` to split a share, or recover a secret from evaluations. We describe each step within this section.
+First you must generate the contract for $(k, n)$ parameters of your choice. Then, you can either use `leo run` or our wrappers within `package.json` to split a share, or recover a secret from evaluations. We describe each step within this section. We are using [Bun](https://bun.sh) runtime, which can be installed via:
+
+```sh
+curl -fsSL https://bun.sh/install | bash
+```
 
 ### Generating the Aleo contract
 
