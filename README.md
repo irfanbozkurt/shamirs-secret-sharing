@@ -8,11 +8,18 @@ We allow users to generate Leo code that splits a given secret into $n$ shares, 
 ## Considerations
 
 1. Leo does not support variable-sized arrays. To achieve fine-grained functionality, we present TypeScript code that generates SSS as Leo code for given $(k, n)$ parameters.
-2. We support secret splitting up to 32 pieces ($k \leq 32$), but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
+2. We support secret splitting up to 32 pieces $(k \leq 32)$, but you can get as many evaluations (of your secret polynomial) as you want, up to 1024 points. Out of these, $k$ of them will suffice for recovery.
 
 ## How to Use
 
-First you must generate the contract for $(k, n)$ parameters of your choice. Then, you can either use `leo run` or our wrappers within `package.json` to split a share, or recover a secret from evaluations. We describe each step within this section. We are using [Bun](https://bun.sh) runtime, which can be installed via:
+Make sure you have an `.env` file ready for Aleo. It should look like the following:
+
+```sh
+NETWORK=testnet3 # or another network of your choice
+PRIVATE_KEY=your-private-key # you can generate one with `leo account new`
+```
+
+You must first generate the contract for $(k, n)$ parameters of your choice. Then, you can either use `leo run` or our wrappers within `package.json` to split a share, or recover a secret from evaluations. We describe each step within this section. We are using [Bun](https://bun.sh) runtime, which can be installed via:
 
 ```sh
 curl -fsSL https://bun.sh/install | bash
@@ -105,7 +112,7 @@ Grab $k$ of the field elements outputted in step-2, and place them into `/inputs
 ```js
 [recover]
 evals: [[field; 2]; 3] = [
-
+  /* your inputs shall be pasted here */
 ];
 ```
 

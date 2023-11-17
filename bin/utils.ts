@@ -54,6 +54,11 @@ export function parseOutput(n: number, output: string): [bigint, bigint][] {
   return Array.from({ length: n }, (_, i) => [BigInt(lines[i * 2]), BigInt(lines[i * 2 + 1])] as [bigint, bigint]);
 }
 
+/**
+ * Creates an input file to be used with `recover` function for the given evaluations.
+ * @param evals evaluation points
+ * @returns input file content
+ */
 export function createInput(evals: [bigint, bigint][]): string {
   const evalStrs = evals.map(
     (e) => `[

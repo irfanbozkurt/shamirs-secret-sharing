@@ -3,6 +3,10 @@
   "private": true,
   "module": "index.ts",
   "type": "module",
+  "contributors": [
+    "irfanbozkurt <https://github.com/irfanbozkurt>",
+    "erhant <https://github.com/erhant>"
+  ],
   "scripts": {
     "test": "bun test --timeout 30000 --bail --coverage",
     "gen": "bun run ./bin/index.ts",
