@@ -1,4 +1,7 @@
-# Shamir's Secret Sharing
+
+
+
+# 🏆🏆 Aleo ZK Hackathon - Winner for Multiple Bounties 🏆🏆
 
 We allow users to generate Leo code that splits a given secret into $n$ shares, of which $k$ is sufficient to recover the original secret when all put back together.
 
